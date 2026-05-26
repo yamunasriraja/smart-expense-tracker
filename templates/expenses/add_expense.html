@@ -1,0 +1,122 @@
+<!-- templates/expenses/add_expense.html -->
+{% extends "base.html" %}
+
+{% block title %}Add Expense — Smart Expense Tracker{% endblock %}
+{% block page_title %}Add New Expense{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Record an Expense</h4>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                    Fill in the details below to log a new expense.
+                </p>
+            </div>
+            <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <!-- Form Card -->
+        <div class="stat-card">
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Amount & Category (side by side on md+) -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.amount.id_for_label }}">
+                            <i class="bi bi-currency-rupee"></i>
+                            {{ form.amount.label }}
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            {% for error in form.amount.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.category.id_for_label }}">
+                            <i class="bi bi-tag"></i>
+                            {{ form.category.label }}
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            {% for error in form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.date.id_for_label }}">
+                        <i class="bi bi-calendar3"></i>
+                        {{ form.date.label }}
+                    </label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        {% for error in form.date.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="bi bi-exclamation-circle"></i> {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">
+                        <i class="bi bi-chat-left-text"></i>
+                        {{ form.description.label }}
+                        <span class="text-muted fw-normal">(optional)</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="bi bi-exclamation-circle"></i> {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Add Expense
+                    </button>
+                    <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Quick Tips Card -->
+        <div class="stat-card mt-4" style="background: var(--accent-light); border-color: var(--accent);">
+            <h6 class="fw-bold mb-3" style="color: var(--accent);">
+                <i class="bi bi-lightbulb"></i> Quick Tips
+            </h6>
+            <ul class="mb-0" style="font-size: 0.88rem; color: var(--text-muted); padding-left: 1.2rem;">
+                <li class="mb-1">Use the <strong>correct category</strong> for better analytics on your dashboard.</li>
+                <li class="mb-1">Add a <strong>description</strong> to remember what the expense was for later.</li>
+                <li>Past dates are allowed — you can log expenses retroactively.</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,135 @@
+<!-- templates/expenses/edit_expense.html -->
+{% extends "base.html" %}
+
+{% block title %}Edit Expense — Smart Expense Tracker{% endblock %}
+{% block page_title %}Edit Expense{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+
+        <!-- Page Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Edit Expense</h4>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                    Update the details for this expense entry.
+                </p>
+            </div>
+            <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Back to List
+            </a>
+        </div>
+
+        <!-- Current Values Reference Card -->
+        <div class="stat-card mb-4" style="background: #f8fafc;">
+            <p class="mb-2" style="font-size: 0.78rem; font-weight: 700;
+               text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted);">
+                Currently Saved
+            </p>
+            <div class="d-flex flex-wrap gap-3">
+                <span class="current-value-chip">
+                    <i class="bi bi-currency-rupee"></i>
+                    ₹{{ expense.amount|floatformat:2 }}
+                </span>
+                <span class="current-value-chip">
+                    <i class="bi bi-tag"></i>
+                    {{ expense.get_category_display }}
+                </span>
+                <span class="current-value-chip">
+                    <i class="bi bi-calendar3"></i>
+                    {{ expense.date|date:"d M Y" }}
+                </span>
+                {% if expense.description %}
+                <span class="current-value-chip">
+                    <i class="bi bi-chat-left-text"></i>
+                    {{ expense.description|truncatechars:40 }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Edit Form Card -->
+        <div class="stat-card">
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Amount & Category -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.amount.id_for_label }}">
+                            <i class="bi bi-currency-rupee"></i> {{ form.amount.label }}
+                        </label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            {% for error in form.amount.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.category.id_for_label }}">
+                            <i class="bi bi-tag"></i> {{ form.category.label }}
+                        </label>
+                        {{ form.category }}
+                        {% if form.category.errors %}
+                            {% for error in form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    <i class="bi bi-exclamation-circle"></i> {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="mb-3">
+                    <label class="form-label" for="{{ form.date.id_for_label }}">
+                        <i class="bi bi-calendar3"></i> {{ form.date.label }}
+                    </label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        {% for error in form.date.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="bi bi-exclamation-circle"></i> {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label class="form-label" for="{{ form.description.id_for_label }}">
+                        <i class="bi bi-chat-left-text"></i>
+                        {{ form.description.label }}
+                        <span class="text-muted fw-normal">(optional)</span>
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        {% for error in form.description.errors %}
+                            <div class="invalid-feedback d-block">
+                                <i class="bi bi-exclamation-circle"></i> {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Save Changes
+                    </button>
+                    <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

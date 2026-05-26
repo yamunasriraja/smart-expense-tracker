@@ -1,0 +1,137 @@
+<!-- templates/expenses/search.html -->
+{% extends "base.html" %}
+
+{% block title %}Search Expenses — Smart Expense Tracker{% endblock %}
+{% block page_title %}Search Expenses{% endblock %}
+
+{% block content %}
+
+<!-- Search Bar -->
+<div class="stat-card mb-4">
+    <form method="GET" action="{% url 'search' %}">
+        <div class="d-flex gap-3 align-items-center">
+            <div class="flex-grow-1 position-relative">
+                <i class="bi bi-search search-icon-inside"></i>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ query }}"
+                    class="form-control form-control-lg ps-5"
+                    placeholder="Search by description or category…"
+                    autofocus
+                    autocomplete="off"
+                >
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg px-4">
+                Search
+            </button>
+            {% if query %}
+            <a href="{% url 'search' %}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<!-- Results Summary -->
+{% if query %}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+    <p class="mb-0 text-muted" style="font-size: 0.9rem;">
+        {% if count > 0 %}
+            Found <strong>{{ count }} result{{ count|pluralize }}</strong>
+            for "<strong>{{ query }}</strong>"
+            — Total: <strong>₹{{ total|floatformat:2 }}</strong>
+        {% else %}
+            No results found for "<strong>{{ query }}</strong>"
+        {% endif %}
+    </p>
+    {% if count > 0 %}
+    <a href="{% url 'export_csv' %}?q={{ query }}"
+       class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-download"></i> Export Results
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Results Table -->
+{% if expenses %}
+<div class="expense-table">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th class="text-end">Amount</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>
+                    <span class="fw-semibold" style="font-size: 0.9rem;">
+                        {{ expense.date|date:"d M Y" }}
+                    </span>
+                </td>
+                <td>
+                    <span class="badge-category cat-{{ expense.category }}">
+                        <i class="bi {{ expense.get_category_icon }}"></i>
+                        {{ expense.get_category_display }}
+                    </span>
+                </td>
+                <td style="color: var(--text-muted); font-size: 0.88rem;">
+                    {% if expense.description %}
+                        {{ expense.description|truncatechars:60 }}
+                    {% else %}
+                        <span style="font-style:italic; opacity:0.5;">No description</span>
+                    {% endif %}
+                </td>
+                <td class="text-end fw-bold">
+                    ₹{{ expense.amount|floatformat:2 }}
+                </td>
+                <td class="text-center">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{% url 'edit_expense' expense.pk %}"
+                           class="btn btn-sm btn-icon btn-edit" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% elif query %}
+<!-- No results state -->
+<div class="stat-card text-center py-5">
+    <div style="font-size: 3.5rem; opacity: 0.25;">🔍</div>
+    <h5 class="mt-3 fw-bold" style="color: var(--text-muted);">
+        No expenses found
+    </h5>
+    <p class="text-muted mb-4" style="font-size:0.9rem;">
+        Try a different keyword — category name, description word, or amount.
+    </p>
+    <a href="{% url 'search' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Clear Search
+    </a>
+</div>
+
+{% else %}
+<!-- Initial state — no query yet -->
+<div class="stat-card text-center py-5">
+    <div style="font-size: 3.5rem; opacity: 0.25;">🔍</div>
+    <h5 class="mt-3 fw-bold" style="color: var(--text-muted);">
+        Search your expenses
+    </h5>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">
+        Type a keyword above to find expenses by description or category.
+    </p>
+</div>
+{% endif %}
+
+{% endblock %}

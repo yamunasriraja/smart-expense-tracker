@@ -1,0 +1,305 @@
+<!-- templates/expenses/expense_list.html -->
+{% extends "base.html" %}
+
+{% block title %}My Expenses — Smart Expense Tracker{% endblock %}
+{% block page_title %}All Expenses{% endblock %}
+
+{% block content %}
+
+<!-- ===== TOP BAR: Stats + Add Button ===== -->
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div class="d-flex gap-3 flex-wrap">
+
+        <!-- Total Amount -->
+        <div class="stat-chip">
+            <span class="stat-chip-label">
+                <i class="bi bi-currency-rupee"></i> Total Shown
+            </span>
+            <span class="stat-chip-value">₹{{ total_amount|floatformat:2 }}</span>
+        </div>
+
+        <!-- Count -->
+        <div class="stat-chip">
+            <span class="stat-chip-label">
+                <i class="bi bi-list-ol"></i> Transactions
+            </span>
+            <span class="stat-chip-value">{{ expense_count }}</span>
+        </div>
+
+    </div>
+
+    <a href="{% url 'add_expense' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Add Expense
+    </a>
+</div>
+
+<!-- ===== FILTER BAR ===== -->
+<div class="stat-card mb-4 py-3">
+    <form method="GET" class="row g-2 align-items-end">
+
+        <!-- Category Filter -->
+        <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-1" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">
+                CATEGORY
+            </label>
+            <select name="category" class="form-select form-select-sm">
+                <option value="">All Categories</option>
+                {% for value, label in category_choices %}
+                    <option value="{{ value }}"
+                        {% if selected_category == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Month Filter -->
+        <div class="col-sm-4 col-md-3">
+            <label class="form-label mb-1" style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted);">
+                MONTH
+            </label>
+            <input
+                type="month"
+                name="month"
+                class="form-control form-control-sm"
+                value="{{ selected_month }}"
+            >
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-sm-4 col-md-auto d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-funnel"></i> Filter
+            </button>
+            {% if selected_category or selected_month %}
+                <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-x-circle"></i> Clear
+                </a>
+            {% endif %}
+        </div>
+
+    </form>
+</div>
+
+<!-- ===== EXPENSE TABLE ===== -->
+{% if expenses %}
+<div class="expense-table">
+    <table class="table mb-0">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th class="text-end">Amount</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+
+                <!-- Date -->
+                <td>
+                    <span class="fw-semibold" style="font-size: 0.9rem;">
+                        {{ expense.date|date:"d M Y" }}
+                    </span>
+                    <br>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">
+                        {{ expense.date|date:"l" }}
+                    </span>
+                </td>
+
+                <!-- Category Badge -->
+                <td>
+                    <span class="badge-category cat-{{ expense.category }}">
+                        <i class="bi {{ expense.get_category_icon }}"></i>
+                        {{ expense.get_category_display }}
+                    </span>
+                </td>
+
+                <!-- Description -->
+                <td style="color: var(--text-muted); font-size: 0.88rem; max-width: 220px;">
+                    {% if expense.description %}
+                        {{ expense.description|truncatechars:60 }}
+                    {% else %}
+                        <span style="font-style: italic; opacity: 0.5;">No description</span>
+                    {% endif %}
+                </td>
+
+                <!-- Amount -->
+                <td class="text-end">
+                    <span class="fw-bold" style="font-size: 1rem; color: var(--text-main);">
+                        ₹{{ expense.amount|floatformat:2 }}
+                    </span>
+                </td>
+
+                <!-- Action Buttons -->
+                <td class="text-center">
+                    <div class="d-flex gap-2 justify-content-center">
+
+                        <!-- Edit Button -->
+                        <a href="{% url 'edit_expense' expense.pk %}"
+                           class="btn btn-sm btn-icon btn-edit"
+                           title="Edit expense">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+
+                        <!-- Delete Button (triggers modal) -->
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-icon btn-delete"
+                            title="Delete expense"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteModal"
+                            data-expense-id="{{ expense.pk }}"
+                            data-expense-amount="₹{{ expense.amount|floatformat:2 }}"
+                            data-expense-category="{{ expense.get_category_display }}"
+                            data-expense-date="{{ expense.date|date:'d M Y' }}">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        <!-- Table Footer with Total -->
+        <tfoot>
+            <tr style="background: #f8fafc; border-top: 2px solid var(--border);">
+                <td colspan="3" class="text-end fw-semibold py-3" style="font-size: 0.88rem; color: var(--text-muted);">
+                    TOTAL ({{ expense_count }} transaction{{ expense_count|pluralize }})
+                </td>
+                <td class="text-end py-3">
+                    <span class="fw-bold" style="font-size: 1.05rem; color: var(--accent);">
+                        ₹{{ total_amount|floatformat:2 }}
+                    </span>
+                </td>
+                <td></td>
+            </tr>
+        </tfoot>
+
+    </table>
+</div>
+
+{% else %}
+<!-- ===== EMPTY STATE ===== -->
+<div class="stat-card text-center py-5">
+    <div style="font-size: 4rem; opacity: 0.3;">💸</div>
+    <h5 class="mt-3 fw-bold" style="color: var(--text-muted);">
+        {% if selected_category or selected_month %}
+            No expenses match your filters
+        {% else %}
+            No expenses yet
+        {% endif %}
+    </h5>
+    <p class="text-muted mb-4" style="font-size: 0.9rem;">
+        {% if selected_category or selected_month %}
+            Try clearing the filters to see all your expenses.
+        {% else %}
+            Start tracking your spending by adding your first expense.
+        {% endif %}
+    </p>
+    {% if selected_category or selected_month %}
+        <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle"></i> Clear Filters
+        </a>
+    {% else %}
+        <a href="{% url 'add_expense' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Your First Expense
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+
+
+<!-- ===== DELETE CONFIRMATION MODAL ===== -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: var(--radius); border: none; box-shadow: var(--shadow-md);">
+
+            <!-- Header -->
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle text-danger"></i>
+                    Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body pt-2">
+                <p class="text-muted mb-3" style="font-size: 0.9rem;">
+                    Are you sure you want to delete this expense? This action cannot be undone.
+                </p>
+
+                <!-- Expense Details Preview -->
+                <div class="delete-preview">
+                    <div class="delete-preview-row">
+                        <span class="label">Category</span>
+                        <span class="value" id="modalCategory">—</span>
+                    </div>
+                    <div class="delete-preview-row">
+                        <span class="label">Amount</span>
+                        <span class="value fw-bold text-danger" id="modalAmount">—</span>
+                    </div>
+                    <div class="delete-preview-row">
+                        <span class="label">Date</span>
+                        <span class="value" id="modalDate">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i> Cancel
+                </button>
+
+                <!-- This form submits a POST to the delete URL -->
+                <form id="deleteForm" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash3"></i> Yes, Delete It
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    /**
+     * When the delete modal opens, populate it with the expense details
+     * from the data-* attributes on the button that was clicked.
+     * This way we don't need a separate page for each delete confirmation.
+     */
+    const deleteModal = document.getElementById('deleteModal');
+
+    deleteModal.addEventListener('show.bs.modal', function(event) {
+        // The button that triggered the modal
+        const btn = event.relatedTarget;
+
+        // Read the data attributes
+        const expenseId       = btn.getAttribute('data-expense-id');
+        const expenseAmount   = btn.getAttribute('data-expense-amount');
+        const expenseCategory = btn.getAttribute('data-expense-category');
+        const expenseDate     = btn.getAttribute('data-expense-date');
+
+        // Populate modal content
+        document.getElementById('modalAmount').textContent   = expenseAmount;
+        document.getElementById('modalCategory').textContent = expenseCategory;
+        document.getElementById('modalDate').textContent     = expenseDate;
+
+        // Set the form action to the correct delete URL
+        document.getElementById('deleteForm').action =
+            `/expenses/${expenseId}/delete/`;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+<!-- templates/expenses/set_budget.html -->
+{% extends "base.html" %}
+{% load expense_filters %}
+{% block title %}Set Budget — Smart Expense Tracker{% endblock %}
+{% block page_title %}Monthly Budget{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+
+        <!-- Header -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">
+                    {% if existing_budget %}Update{% else %}Set{% endif %}
+                    Budget for {{ current_month }}
+                </h4>
+                <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                    Your budget helps track how much you're allowed to spend.
+                </p>
+            </div>
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left"></i> Dashboard
+            </a>
+        </div>
+
+        <!-- Current Spending Context Card -->
+        <div class="row g-3 mb-4">
+            <div class="col-6">
+                <div class="stat-card text-center py-3">
+                    <div class="stat-icon icon-purple mx-auto mb-2"
+                         style="width:44px;height:44px;font-size:1.2rem;">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+                    <div class="fw-bold" style="font-size: 1.2rem;">
+                        ₹{{ monthly_total|floatformat:2 }}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.78rem;">
+                        Spent This Month
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="stat-card text-center py-3">
+                    <div class="stat-icon icon-green mx-auto mb-2"
+                         style="width:44px;height:44px;font-size:1.2rem;">
+                        <i class="bi bi-bullseye"></i>
+                    </div>
+                    <div class="fw-bold" style="font-size: 1.2rem;">
+                        {% if existing_budget %}
+                            ₹{{ existing_budget.amount|floatformat:2 }}
+                        {% else %}
+                            Not Set
+                        {% endif %}
+                    </div>
+                    <div class="text-muted" style="font-size: 0.78rem;">
+                        Current Budget
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Budget Form -->
+        <div class="stat-card">
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                <div class="mb-2">
+                    <label class="form-label fw-semibold" for="{{ form.amount.id_for_label }}">
+                        <i class="bi bi-bullseye" style="color: var(--accent);"></i>
+                        {{ form.amount.label }}
+                    </label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text fw-bold">₹</span>
+                        {{ form.amount }}
+                    </div>
+                    {% if form.amount.errors %}
+                        {% for error in form.amount.errors %}
+                            <div class="invalid-feedback d-block mt-1">
+                                <i class="bi bi-exclamation-circle"></i> {{ error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- Quick-select suggestion chips -->
+                <div class="mb-4 mt-3">
+                    <p class="mb-2" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">
+                        QUICK SELECT
+                    </p>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for amount in "5000,10000,15000,20000,25000,30000"|split:"," %}
+                        <button type="button"
+                                class="btn btn-sm budget-chip"
+                                onclick="setBudget({ amount })">
+                            ₹{{ amount }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i>
+                        {% if existing_budget %}Update Budget{% else %}Set Budget{% endif %}
+                    </button>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Info Box -->
+        <div class="stat-card mt-4"
+             style="background: var(--accent-light); border-color: #c5bcff;">
+            <h6 class="fw-bold mb-2" style="color: var(--accent); font-size: 0.9rem;">
+                <i class="bi bi-info-circle"></i> How Budgets Work
+            </h6>
+            <ul class="mb-0" style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.2rem;">
+                <li class="mb-1">Your budget applies to the <strong>current calendar month</strong> only.</li>
+                <li class="mb-1">A <strong>progress bar</strong> on the dashboard shows how much you've used.</li>
+                <li class="mb-1">You'll get a <strong>warning alert</strong> when you reach 80% of your budget.</li>
+                <li>A <strong>red alert</strong> fires if you go over your limit.</li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function setBudget(amount) {
+        document.querySelector('input[name="amount"]').value = amount;
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,503 @@
+<!-- templates/expenses/dashboard.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard — Smart Expense Tracker{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ===================================================
+     SMART INSIGHTS BAR
+=================================================== -->
+{% if insights %}
+<div class="mb-4">
+    {% for insight in insights %}
+    <div class="alert alert-{{ insight.type }} alert-dismissible fade show d-flex align-items-center gap-2 mb-2"
+         role="alert" style="border-radius: var(--radius-sm); font-size: 0.88rem;">
+        <i class="bi {{ insight.icon }} flex-shrink-0" style="font-size: 1.1rem;"></i>
+        <span>{{ insight.message }}</span>
+        <button type="button" class="btn-close btn-sm ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<!-- ===================================================
+     STAT CARDS ROW
+=================================================== -->
+<div class="row g-4 mb-4">
+
+    <!-- Card 1: This Month's Spending -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon icon-purple">
+                <i class="bi bi-currency-rupee"></i>
+            </div>
+            <div class="stat-value">₹{{ this_month_total|floatformat:2 }}</div>
+            <div class="stat-label">{{ current_month_name }} Spending</div>
+
+            {% if spending_change is not None %}
+            <div class="mt-2">
+                {% if spending_change > 0 %}
+                    <span class="trend-badge trend-up">
+                        <i class="bi bi-arrow-up"></i> {{ spending_change }}% vs last month
+                    </span>
+                {% elif spending_change < 0 %}
+                    <span class="trend-badge trend-down">
+                        <i class="bi bi-arrow-down"></i> {{ spending_change|cut:"-" }}% vs last month
+                    </span>
+                {% else %}
+                    <span class="trend-badge trend-flat">
+                        <i class="bi bi-dash"></i> Same as last month
+                    </span>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Card 2: Transactions This Month -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon icon-green">
+                <i class="bi bi-receipt"></i>
+            </div>
+            <div class="stat-value">{{ this_month_count }}</div>
+            <div class="stat-label">Transactions This Month</div>
+            <div class="mt-2">
+                <span class="trend-badge trend-flat">
+                    <i class="bi bi-calendar3"></i> {{ current_month_name }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Top Category -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon icon-orange">
+                <i class="bi bi-tag"></i>
+            </div>
+            {% if top_category %}
+                <div class="stat-value" style="font-size: 1.2rem;">
+                    {{ top_category.label }}
+                </div>
+                <div class="stat-label">Top Spending Category</div>
+                <div class="mt-2">
+                    <span class="trend-badge trend-flat">
+                        <i class="bi bi-currency-rupee"></i>
+                        ₹{{ top_category.total|floatformat:2 }} this month
+                    </span>
+                </div>
+            {% else %}
+                <div class="stat-value">—</div>
+                <div class="stat-label">Top Category</div>
+                <div class="mt-2">
+                    <span class="trend-badge trend-flat">No data yet</span>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Card 4: Last Month Comparison -->
+    <div class="col-sm-6 col-xl-3">
+        <div class="stat-card h-100">
+            <div class="stat-icon icon-red">
+                <i class="bi bi-graph-up-arrow"></i>
+            </div>
+            <div class="stat-value">₹{{ last_month_total|floatformat:2 }}</div>
+            <div class="stat-label">Last Month's Total</div>
+            <div class="mt-2">
+                <span class="trend-badge trend-flat">
+                    <i class="bi bi-clock-history"></i> For comparison
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /row -->
+
+
+
+
+<!-- ADD THIS BLOCK between the stat cards row and the charts row -->
+
+<!-- ===================================================
+     BUDGET PROGRESS BAR
+=================================================== -->
+{% if budget %}
+<div class="stat-card mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div>
+            <h6 class="chart-title mb-0">
+                <i class="bi bi-bullseye" style="color: var(--accent);"></i>
+                Monthly Budget — {{ current_month_name }}
+            </h6>
+            <p class="chart-subtitle mt-1 mb-0">
+                ₹{{ budget_spent|floatformat:2 }} spent of
+                ₹{{ budget_amount|floatformat:2 }} budget
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            {% if budget_remaining >= 0 %}
+                <span class="trend-badge trend-down">
+                    <i class="bi bi-check-circle"></i>
+                    ₹{{ budget_remaining|floatformat:2 }} remaining
+                </span>
+            {% else %}
+                <span class="trend-badge trend-up">
+                    <i class="bi bi-exclamation-circle"></i>
+                    ₹{{ budget_remaining|floatformat:2 }} over budget
+                </span>
+            {% endif %}
+            <a href="{% url 'set_budget' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-pencil"></i> Edit Budget
+            </a>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="budget-bar-wrap">
+        <div
+            class="budget-bar-fill
+                   {% if budget_percentage >= 100 %}budget-bar-danger
+                   {% elif budget_percentage >= 80 %}budget-bar-warning
+                   {% else %}budget-bar-good{% endif %}"
+            style="width: {{ budget_percentage }}%"
+        ></div>
+    </div>
+
+    <!-- Percentage Labels -->
+    <div class="d-flex justify-content-between mt-2" style="font-size: 0.78rem; color: var(--text-muted);">
+        <span>₹0</span>
+        <span class="fw-semibold
+              {% if budget_percentage >= 100 %}text-danger
+              {% elif budget_percentage >= 80 %}text-warning
+              {% else %}text-success{% endif %}">
+            {{ budget_percentage }}% used
+        </span>
+        <span>₹{{ budget_amount|floatformat:2 }}</span>
+    </div>
+</div>
+
+{% else %}
+<!-- No budget set yet — gentle nudge -->
+<div class="stat-card mb-4 budget-nudge">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="stat-icon icon-purple mb-0" style="width:44px; height:44px; font-size:1.3rem;">
+                <i class="bi bi-bullseye"></i>
+            </div>
+            <div>
+                <p class="fw-bold mb-0" style="font-size: 0.95rem;">
+                    Set a Monthly Budget
+                </p>
+                <p class="text-muted mb-0" style="font-size: 0.82rem;">
+                    Track how much of your budget you've used in real time.
+                </p>
+            </div>
+        </div>
+        <a href="{% url 'set_budget' %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-circle"></i> Set Budget for {{ current_month_name }}
+        </a>
+    </div>
+</div>
+{% endif %}
+<!-- ===================================================
+     CHARTS ROW
+=================================================== -->
+<div class="row g-4 mb-4">
+
+    <!-- Line Chart: Monthly Trend -->
+    <div class="col-lg-7">
+        <div class="stat-card h-100">
+            <div class="chart-header">
+                <div>
+                    <h6 class="chart-title">Monthly Spending Trend</h6>
+                    <p class="chart-subtitle">Your spending over the last 6 months</p>
+                </div>
+                <div class="chart-badge">
+                    <i class="bi bi-graph-up"></i> 6 Months
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pie Chart: Category Breakdown -->
+    <div class="col-lg-5">
+        <div class="stat-card h-100">
+            <div class="chart-header">
+                <div>
+                    <h6 class="chart-title">Spending by Category</h6>
+                    <p class="chart-subtitle">{{ current_month_name }} breakdown</p>
+                </div>
+                <div class="chart-badge">
+                    <i class="bi bi-pie-chart"></i> This Month
+                </div>
+            </div>
+
+            {% if pie_totals != '[]' %}
+                <div class="chart-container" style="max-height: 230px;">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <!-- Legend below pie chart -->
+                <div class="pie-legend mt-3" id="pieLegend"></div>
+            {% else %}
+                <div class="chart-empty">
+                    <i class="bi bi-pie-chart" style="font-size: 2.5rem; opacity: 0.2;"></i>
+                    <p class="mt-2 mb-0">No expenses this month yet.</p>
+                    <a href="{% url 'add_expense' %}" class="btn btn-primary btn-sm mt-3">
+                        <i class="bi bi-plus-circle"></i> Add Expense
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div><!-- /charts row -->
+
+
+<!-- ===================================================
+     RECENT TRANSACTIONS
+=================================================== -->
+<div class="stat-card">
+    <div class="chart-header mb-3">
+        <div>
+            <h6 class="chart-title">Recent Transactions</h6>
+            <p class="chart-subtitle">Your latest 6 expense entries</p>
+        </div>
+        <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary btn-sm">
+            View All <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    {% if recent_expenses %}
+    <div class="recent-list">
+        {% for expense in recent_expenses %}
+        <div class="recent-item">
+
+            <!-- Category Icon -->
+            <div class="recent-icon cat-icon-{{ expense.category }}">
+                <i class="bi {{ expense.get_category_icon }}"></i>
+            </div>
+
+            <!-- Description & Category -->
+            <div class="recent-info">
+                <div class="recent-desc">
+                    {% if expense.description %}
+                        {{ expense.description|truncatechars:45 }}
+                    {% else %}
+                        {{ expense.get_category_display }}
+                    {% endif %}
+                </div>
+                <div class="recent-meta">
+                    <span class="badge-category cat-{{ expense.category }}" style="font-size: 0.72rem; padding: 3px 9px;">
+                        {{ expense.get_category_display }}
+                    </span>
+                    <span class="recent-date">
+                        <i class="bi bi-calendar3"></i>
+                        {{ expense.date|date:"d M Y" }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Amount -->
+            <div class="recent-amount">
+                ₹{{ expense.amount|floatformat:2 }}
+            </div>
+
+            <!-- Quick Edit Link -->
+            <a href="{% url 'edit_expense' expense.pk %}"
+               class="btn btn-icon btn-edit btn-xs"
+               title="Edit">
+                <i class="bi bi-pencil"></i>
+            </a>
+
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="chart-empty py-4">
+        <i class="bi bi-inbox" style="font-size: 2.5rem; opacity: 0.2;"></i>
+        <p class="mt-2 mb-0 text-muted">No transactions yet.</p>
+        <a href="{% url 'add_expense' %}" class="btn btn-primary btn-sm mt-3">
+            <i class="bi bi-plus-circle"></i> Add Your First Expense
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+
+
+<!-- ===================================================
+     CHART.JS SCRIPTS
+=================================================== -->
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA from Django (passed as JSON)
+// ─────────────────────────────────────────────
+const trendLabels  = {{ trend_labels|safe }};
+const trendTotals  = {{ trend_totals|safe }};
+const pieLabels    = {{ pie_labels|safe }};
+const pieTotals    = {{ pie_totals|safe }};
+const pieColors    = {{ pie_colors|safe }};
+
+// ─────────────────────────────────────────────
+// SHARED CHART DEFAULTS
+// ─────────────────────────────────────────────
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color       = '#64748b';
+
+// ─────────────────────────────────────────────
+// LINE CHART — Monthly Trend
+// ─────────────────────────────────────────────
+const trendCtx = document.getElementById('trendChart');
+
+if (trendCtx) {
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels:   trendLabels,
+            datasets: [{
+                label:           'Monthly Spending (₹)',
+                data:            trendTotals,
+                borderColor:     '#6c63ff',
+                backgroundColor: 'rgba(108, 99, 255, 0.08)',
+                borderWidth:     2.5,
+                pointBackgroundColor: '#6c63ff',
+                pointBorderColor:     '#fff',
+                pointBorderWidth:     2,
+                pointRadius:          5,
+                pointHoverRadius:     7,
+                fill:    true,
+                tension: 0.4,    // Smooth curves (0 = straight lines, 1 = very curved)
+            }]
+        },
+        options: {
+            responsive:          true,
+            maintainAspectRatio: true,
+            aspectRatio:         2.2,
+            interaction: {
+                intersect: false,
+                mode:      'index',
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1a1f2e',
+                    padding:         12,
+                    titleFont:       { size: 13, weight: '600' },
+                    bodyFont:        { size: 12 },
+                    callbacks: {
+                        // Format tooltip values as currency
+                        label: ctx => ` ₹${ctx.parsed.y.toLocaleString('en-IN', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        })}`
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 11 } }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color:     'rgba(0,0,0,0.05)',
+                        drawBorder: false,
+                    },
+                    ticks: {
+                        font: { size: 11 },
+                        callback: val => '₹' + val.toLocaleString('en-IN')
+                    }
+                }
+            }
+        }
+    });
+}
+
+// ─────────────────────────────────────────────
+// PIE CHART — Category Breakdown
+// ─────────────────────────────────────────────
+const categoryCtx = document.getElementById('categoryChart');
+
+if (categoryCtx && pieTotals.length > 0) {
+    const pieChart = new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: {
+            labels:   pieLabels,
+            datasets: [{
+                data:             pieTotals,
+                backgroundColor:  pieColors,
+                borderColor:      '#ffffff',
+                borderWidth:      3,
+                hoverBorderWidth: 4,
+                hoverOffset:      6,
+            }]
+        },
+        options: {
+            responsive:          true,
+            maintainAspectRatio: true,
+            cutout:              '62%',    // Makes it a doughnut (0% = full pie)
+            plugins: {
+                legend: { display: false },   // We build our own legend below
+                tooltip: {
+                    backgroundColor: '#1a1f2e',
+                    padding:         12,
+                    callbacks: {
+                        label: ctx => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            const pct   = ((ctx.parsed / total) * 100).toFixed(1);
+                            return ` ₹${ctx.parsed.toLocaleString('en-IN', {
+                                minimumFractionDigits: 2
+                            })} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // ── Build custom HTML legend ──
+    const legendEl = document.getElementById('pieLegend');
+    const total    = pieTotals.reduce((a, b) => a + b, 0);
+
+    pieLabels.forEach((label, i) => {
+        const pct  = total > 0 ? ((pieTotals[i] / total) * 100).toFixed(1) : 0;
+        const item = document.createElement('div');
+        item.className = 'pie-legend-item';
+        item.innerHTML = `
+            <span class="pie-legend-dot" style="background:${pieColors[i]}"></span>
+            <span class="pie-legend-label">${label}</span>
+            <span class="pie-legend-pct">${pct}%</span>
+        `;
+
+        // Hovering legend item highlights the chart segment
+        item.addEventListener('mouseenter', () => {
+            pieChart.setDatasetVisibility(0, true);
+            pieChart.tooltip.setActiveElements(
+                [{ datasetIndex: 0, index: i }],
+                { x: 0, y: 0 }
+            );
+            pieChart.update();
+        });
+
+        legendEl.appendChild(item);
+    });
+}
+</script>
+{% endblock %}

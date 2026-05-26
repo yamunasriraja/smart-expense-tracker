@@ -1,0 +1,797 @@
+/* static/css/style.css */
+
+/* =============================================
+   GLOBAL RESET & BASE STYLES
+   ============================================= */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+    --sidebar-width:    260px;
+    --sidebar-bg:       #1a1f2e;
+    --sidebar-text:     #a8b2d8;
+    --sidebar-active:   #6c63ff;
+    --accent:           #6c63ff;
+    --accent-light:     #ede9ff;
+    --danger:           #ef4444;
+    --success:          #22c55e;
+    --warning:          #f59e0b;
+    --bg-main:          #f5f6fa;
+    --card-bg:          #ffffff;
+    --text-main:        #1e293b;
+    --text-muted:       #64748b;
+    --border:           #e2e8f0;
+    --shadow-sm:        0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md:        0 4px 16px rgba(0,0,0,0.10);
+    --radius:           12px;
+    --radius-sm:        8px;
+    --transition:       0.25s ease;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-main);
+    color: var(--text-main);
+    display: flex;
+    min-height: 100vh;
+}
+
+/* =============================================
+   SIDEBAR
+   ============================================= */
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: width var(--transition);
+    overflow: hidden;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 20px;
+    color: #ffffff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-brand i { font-size: 1.6rem; color: var(--accent); }
+
+.sidebar-nav {
+    flex: 1;
+    padding: 16px 0;
+    overflow-y: auto;
+}
+
+.sidebar-nav .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 0;
+    transition: background var(--transition), color var(--transition);
+    border-left: 3px solid transparent;
+}
+
+.sidebar-nav .nav-link:hover {
+    background: rgba(108, 99, 255, 0.12);
+    color: #ffffff;
+    border-left-color: var(--accent);
+}
+
+.sidebar-nav .nav-link.active {
+    background: rgba(108, 99, 255, 0.18);
+    color: #ffffff;
+    border-left-color: var(--accent);
+}
+
+.sidebar-nav .nav-link i { font-size: 1.1rem; width: 20px; }
+
+.sidebar-footer {
+    padding: 16px 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--sidebar-text);
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+}
+
+.logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #ff6b6b;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color var(--transition);
+}
+
+.logout-btn:hover { color: #ff4444; }
+
+/* =============================================
+   MAIN CONTENT
+   ============================================= */
+.main-content {
+    margin-left: var(--sidebar-width);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left var(--transition);
+}
+
+/* =============================================
+   TOP NAVBAR
+   ============================================= */
+.top-navbar {
+    background: var(--card-bg);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    gap: 16px;
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 4px;
+}
+
+.navbar-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-main);
+    flex: 1;
+}
+
+/* =============================================
+   CONTENT AREA
+   ============================================= */
+.content-area { padding: 24px; flex: 1; }
+
+.messages-container { padding: 12px 24px 0; }
+
+/* =============================================
+   CARDS
+   ============================================= */
+.stat-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-card .stat-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+}
+
+.stat-card .stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+.stat-card .stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Icon color variants */
+.icon-purple { background: var(--accent-light); color: var(--accent); }
+.icon-green  { background: #dcfce7;             color: var(--success); }
+.icon-orange { background: #fef3c7;             color: var(--warning); }
+.icon-red    { background: #fee2e2;             color: var(--danger);  }
+
+/* =============================================
+   AUTH PAGES
+   ============================================= */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+    width: 100%;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.auth-card .brand {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.auth-card .brand i {
+    font-size: 2.5rem;
+    color: var(--accent);
+}
+
+.auth-card .brand h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+/* =============================================
+   FORMS
+   ============================================= */
+.form-label { font-weight: 500; font-size: 0.9rem; color: var(--text-main); }
+
+.form-control, .form-select {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+}
+
+.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: var(--radius-sm);
+}
+
+.btn-primary:hover { background: #5a52e0; border-color: #5a52e0; }
+
+/* =============================================
+   TABLE
+   ============================================= */
+.expense-table { background: var(--card-bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+.expense-table thead th { background: #f8fafc; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 1px solid var(--border); padding: 14px 16px; }
+.expense-table tbody td { padding: 14px 16px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 0.9rem; }
+.expense-table tbody tr:last-child td { border-bottom: none; }
+.expense-table tbody tr:hover { background: #f8fafc; }
+
+/* =============================================
+   CATEGORY BADGES
+   ============================================= */
+.badge-category {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.cat-food          { background: #fef3c7; color: #92400e; }
+.cat-transport     { background: #dbeafe; color: #1e40af; }
+.cat-housing       { background: #d1fae5; color: #065f46; }
+.cat-entertainment { background: #ede9ff; color: #5b21b6; }
+.cat-health        { background: #fee2e2; color: #991b1b; }
+.cat-shopping      { background: #fce7f3; color: #9d174d; }
+.cat-education     { background: #e0f2fe; color: #075985; }
+.cat-utilities     { background: #f0fdf4; color: #166534; }
+.cat-travel        { background: #ecfdf5; color: #047857; }
+.cat-other         { background: #f1f5f9; color: #475569; }
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 768px) {
+    .sidebar { width: 0; }
+    .sidebar.collapsed { width: var(--sidebar-width); }
+    .main-content { margin-left: 0; }
+}
+
+
+
+
+
+/* =============================================
+   ALERT MESSAGES (Flash notifications)
+   ============================================= */
+.alert {
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+.alert-success { background: #dcfce7; color: #166534; }
+.alert-error,
+.alert-danger  { background: #fee2e2; color: #991b1b; }
+.alert-info    { background: #dbeafe; color: #1e40af; }
+.alert-warning { background: #fef3c7; color: #92400e; }
+
+/* =============================================
+   OUTLINE BUTTON
+   ============================================= */
+.btn-outline-secondary {
+    border: 1.5px solid var(--border);
+    color: var(--text-main);
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    padding: 10px 24px;
+    transition: all var(--transition);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--bg-main);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+
+
+
+
+
+
+/* =============================================
+   STAT CHIPS (used in expense list top bar)
+   ============================================= */
+.stat-chip {
+    display:        flex;
+    align-items:    center;
+    gap:            10px;
+    background:     var(--card-bg);
+    border:         1px solid var(--border);
+    border-radius:  var(--radius-sm);
+    padding:        10px 16px;
+    box-shadow:     var(--shadow-sm);
+}
+
+.stat-chip-label {
+    font-size:   0.8rem;
+    font-weight: 600;
+    color:       var(--text-muted);
+}
+
+.stat-chip-value {
+    font-size:   1rem;
+    font-weight: 700;
+    color:       var(--text-main);
+}
+
+/* =============================================
+   ICON ACTION BUTTONS (edit / delete)
+   ============================================= */
+.btn-icon {
+    width:         34px;
+    height:        34px;
+    padding:       0;
+    display:       flex;
+    align-items:   center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    font-size:     0.85rem;
+    border:        1.5px solid transparent;
+    transition:    all var(--transition);
+}
+
+.btn-edit {
+    background:    #ede9ff;
+    color:         var(--accent);
+    border-color:  #d8d1ff;
+}
+
+.btn-edit:hover {
+    background:   var(--accent);
+    color:        white;
+    border-color: var(--accent);
+}
+
+.btn-delete {
+    background:   #fee2e2;
+    color:        var(--danger);
+    border-color: #fecaca;
+}
+
+.btn-delete:hover {
+    background:   var(--danger);
+    color:        white;
+    border-color: var(--danger);
+}
+
+/* =============================================
+   DELETE MODAL PREVIEW BOX
+   ============================================= */
+.delete-preview {
+    background:    #fff5f5;
+    border:        1px solid #fecaca;
+    border-radius: var(--radius-sm);
+    padding:       14px 18px;
+}
+
+.delete-preview-row {
+    display:         flex;
+    justify-content: space-between;
+    align-items:     center;
+    padding:         5px 0;
+    border-bottom:   1px solid #fee2e2;
+    font-size:       0.88rem;
+}
+
+.delete-preview-row:last-child { border-bottom: none; }
+
+.delete-preview-row .label {
+    color:       var(--text-muted);
+    font-weight: 500;
+}
+
+.delete-preview-row .value {
+    color:       var(--text-main);
+    font-weight: 600;
+}
+
+/* =============================================
+   CURRENT VALUE CHIPS (edit page reference)
+   ============================================= */
+.current-value-chip {
+    display:       inline-flex;
+    align-items:   center;
+    gap:           6px;
+    background:    white;
+    border:        1px solid var(--border);
+    border-radius: 20px;
+    padding:       5px 14px;
+    font-size:     0.85rem;
+    color:         var(--text-main);
+    font-weight:   500;
+}
+
+.current-value-chip i { color: var(--accent); }
+
+/* =============================================
+   BUTTON DANGER
+   ============================================= */
+.btn-danger {
+    background:   var(--danger);
+    border-color: var(--danger);
+    font-weight:  600;
+    border-radius: var(--radius-sm);
+}
+
+.btn-danger:hover {
+    background:   #dc2626;
+    border-color: #dc2626;
+}
+
+
+
+
+
+
+/* =============================================
+   TREND BADGES (stat cards)
+   ============================================= */
+.trend-badge {
+    display:       inline-flex;
+    align-items:   center;
+    gap:           4px;
+    font-size:     0.78rem;
+    font-weight:   600;
+    padding:       3px 10px;
+    border-radius: 20px;
+}
+
+.trend-up   { background: #fee2e2; color: var(--danger);  }
+.trend-down { background: #dcfce7; color: var(--success); }
+.trend-flat { background: #f1f5f9; color: var(--text-muted); }
+
+/* =============================================
+   CHART CARDS
+   ============================================= */
+.chart-header {
+    display:         flex;
+    align-items:     flex-start;
+    justify-content: space-between;
+    margin-bottom:   20px;
+}
+
+.chart-title {
+    font-size:   1rem;
+    font-weight: 700;
+    color:       var(--text-main);
+    margin:      0 0 2px 0;
+}
+
+.chart-subtitle {
+    font-size: 0.8rem;
+    color:     var(--text-muted);
+    margin:    0;
+}
+
+.chart-badge {
+    background:    var(--accent-light);
+    color:         var(--accent);
+    border-radius: 20px;
+    padding:       4px 12px;
+    font-size:     0.78rem;
+    font-weight:   600;
+    white-space:   nowrap;
+}
+
+.chart-container {
+    position: relative;
+    width:    100%;
+}
+
+.chart-empty {
+    display:         flex;
+    flex-direction:  column;
+    align-items:     center;
+    justify-content: center;
+    padding:         32px 0;
+    color:           var(--text-muted);
+    font-size:       0.9rem;
+    text-align:      center;
+}
+
+/* =============================================
+   PIE CHART CUSTOM LEGEND
+   ============================================= */
+.pie-legend {
+    display:        flex;
+    flex-direction: column;
+    gap:            6px;
+    max-height:     160px;
+    overflow-y:     auto;
+    padding-right:  4px;
+}
+
+.pie-legend-item {
+    display:     flex;
+    align-items: center;
+    gap:         8px;
+    font-size:   0.82rem;
+    cursor:      pointer;
+    padding:     3px 4px;
+    border-radius: 4px;
+    transition:  background var(--transition);
+}
+
+.pie-legend-item:hover { background: var(--bg-main); }
+
+.pie-legend-dot {
+    width:         10px;
+    height:        10px;
+    border-radius: 50%;
+    flex-shrink:   0;
+}
+
+.pie-legend-label {
+    flex:        1;
+    color:       var(--text-main);
+    font-weight: 500;
+}
+
+.pie-legend-pct {
+    color:       var(--text-muted);
+    font-weight: 600;
+    min-width:   36px;
+    text-align:  right;
+}
+
+/* =============================================
+   RECENT TRANSACTIONS LIST
+   ============================================= */
+.recent-list {
+    display:        flex;
+    flex-direction: column;
+    gap:            2px;
+}
+
+.recent-item {
+    display:     flex;
+    align-items: center;
+    gap:         14px;
+    padding:     12px 4px;
+    border-bottom: 1px solid var(--border);
+    transition:  background var(--transition);
+    border-radius: var(--radius-sm);
+}
+
+.recent-item:last-child { border-bottom: none; }
+.recent-item:hover      { background: var(--bg-main); padding-left: 8px; }
+
+.recent-icon {
+    width:           40px;
+    height:          40px;
+    border-radius:   var(--radius-sm);
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    font-size:       1.1rem;
+    flex-shrink:     0;
+}
+
+/* Map category names to icon background colours */
+.cat-icon-food          { background: #fef3c7; color: #92400e; }
+.cat-icon-transport     { background: #dbeafe; color: #1e40af; }
+.cat-icon-housing       { background: #d1fae5; color: #065f46; }
+.cat-icon-entertainment { background: #ede9ff; color: #5b21b6; }
+.cat-icon-health        { background: #fee2e2; color: #991b1b; }
+.cat-icon-shopping      { background: #fce7f3; color: #9d174d; }
+.cat-icon-education     { background: #e0f2fe; color: #075985; }
+.cat-icon-utilities     { background: #f0fdf4; color: #166534; }
+.cat-icon-travel        { background: #ecfdf5; color: #047857; }
+.cat-icon-other         { background: #f1f5f9; color: #475569; }
+
+.recent-info  { flex: 1; min-width: 0; }
+
+.recent-desc {
+    font-size:     0.9rem;
+    font-weight:   500;
+    color:         var(--text-main);
+    white-space:   nowrap;
+    overflow:      hidden;
+    text-overflow: ellipsis;
+}
+
+.recent-meta {
+    display:     flex;
+    align-items: center;
+    gap:         8px;
+    margin-top:  4px;
+}
+
+.recent-date {
+    font-size: 0.75rem;
+    color:     var(--text-muted);
+}
+
+.recent-amount {
+    font-size:   1rem;
+    font-weight: 700;
+    color:       var(--text-main);
+    white-space: nowrap;
+}
+
+.btn-xs {
+    width:  28px;
+    height: 28px;
+    font-size: 0.75rem;
+}
+/* =============================================
+   SIDEBAR DIVIDER
+   ============================================= */
+.sidebar-divider {
+    height:     1px;
+    background: rgba(255,255,255,0.07);
+    margin:     10px 20px;
+}
+
+/* =============================================
+   BUDGET PROGRESS BAR
+   ============================================= */
+.budget-bar-wrap {
+    height:        12px;
+    background:    #e2e8f0;
+    border-radius: 999px;
+    overflow:      hidden;
+}
+
+.budget-bar-fill {
+    height:        100%;
+    border-radius: 999px;
+    transition:    width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    min-width:     4px;
+}
+
+.budget-bar-good    { background: linear-gradient(90deg, #22c55e, #16a34a); }
+.budget-bar-warning { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.budget-bar-danger  { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+.budget-nudge {
+    border:     1.5px dashed #c5bcff !important;
+    background: var(--accent-light) !important;
+}
+
+/* =============================================
+   BUDGET CHIP (quick-select buttons)
+   ============================================= */
+.budget-chip {
+    background:    white;
+    border:        1.5px solid var(--border);
+    color:         var(--text-main);
+    font-weight:   600;
+    font-size:     0.82rem;
+    padding:       5px 14px;
+    border-radius: 20px;
+    transition:    all var(--transition);
+}
+
+.budget-chip:hover {
+    background:   var(--accent);
+    border-color: var(--accent);
+    color:        white;
+}
+
+/* =============================================
+   SEARCH PAGE
+   ============================================= */
+.search-icon-inside {
+    position:  absolute;
+    left:      16px;
+    top:       50%;
+    transform: translateY(-50%);
+    color:     var(--text-muted);
+    font-size: 1rem;
+    z-index:   5;
+}
+
+/* =============================================
+   INPUT GROUP (Budget form ₹ prefix)
+   ============================================= */
+.input-group-text {
+    background:  var(--bg-main);
+    border:      1.5px solid var(--border);
+    color:       var(--accent);
+    font-size:   1.1rem;
+}
+
+.input-group .form-control {
+    border-left: none;
+}
+
+.input-group .form-control:focus {
+    border-color: var(--accent);
+    box-shadow:   0 0 0 3px rgba(108, 99, 255, 0.12);
+}
+
+/* =============================================
+   RESPONSIVE IMPROVEMENTS
+   ============================================= */
+@media (max-width: 576px) {
+    .content-area    { padding: 16px; }
+    .stat-card       { padding: 18px; }
+    .stat-value      { font-size: 1.4rem; }
+    .top-navbar      { padding: 0 16px; }
+    .chart-header    { flex-direction: column; gap: 10px; }
+}

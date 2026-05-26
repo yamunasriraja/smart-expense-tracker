@@ -1,0 +1,151 @@
+<!-- templates/expenses/login.html -->
+{% extends "base.html" %}
+
+{% block title %}Sign In — Smart Expense Tracker{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+
+    <!-- Brand Header -->
+    <div class="brand">
+        <i class="bi bi-wallet2"></i>
+        <h1>Welcome Back</h1>
+        <p class="text-muted mt-1" style="font-size: 0.9rem;">
+            Sign in to your account
+        </p>
+    </div>
+
+    <!-- Flash Messages (errors from failed login attempt) -->
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-3" role="alert">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle{% else %}exclamation-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Login Form -->
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="mb-3">
+            <label class="form-label" for="id_username">
+                <i class="bi bi-person"></i> Username
+            </label>
+            <input
+                type="text"
+                name="username"
+                id="id_username"
+                class="form-control"
+                placeholder="Enter your username"
+                autocomplete="username"
+                autofocus
+                required
+            >
+        </div>
+
+        <!-- Password -->
+        <div class="mb-4">
+            <label class="form-label" for="id_password">
+                <i class="bi bi-lock"></i> Password
+            </label>
+            <div class="position-relative">
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    class="form-control"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required
+                >
+                <button type="button" class="password-toggle" onclick="togglePassword('id_password', this)">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary w-100 mb-3">
+            <i class="bi bi-box-arrow-in-right"></i> Sign In
+        </button>
+
+        <!-- Divider -->
+        <div class="divider">
+            <span>New here?</span>
+        </div>
+
+        <!-- Link to Register -->
+        <a href="{% url 'register' %}" class="btn btn-outline-secondary w-100 mt-3">
+            <i class="bi bi-person-plus"></i> Create a Free Account
+        </a>
+
+    </form>
+</div>
+{% endblock %}
+
+
+{% block extra_css %}
+<style>
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 4px;
+        font-size: 1rem;
+        z-index: 5;
+    }
+
+    .password-toggle:hover { color: var(--accent); }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        margin: 8px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    .auth-card { animation: slideUp 0.4s ease-out; }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0);    }
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    function togglePassword(fieldId, btn) {
+        const field = document.getElementById(fieldId);
+        const icon  = btn.querySelector('i');
+
+        if (field.type === 'password') {
+            field.type     = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            field.type     = 'password';
+            icon.className = 'bi bi-eye';
+        }
+    }
+</script>
+{% endblock %}
